@@ -33,7 +33,6 @@ class AlienInvasion:
             # Make the most recently drawn screen visible
             pygame.display.flip()
 
-
     def _check_events(self):
         """Respond to key presses and mouse events"""
 
