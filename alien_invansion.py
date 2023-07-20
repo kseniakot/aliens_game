@@ -3,6 +3,7 @@ import pygame
 
 from settings import Settings
 from ship import Ship
+from bullet import Bullet
 
 
 class AlienInvasion:
@@ -13,21 +14,25 @@ class AlienInvasion:
         pygame.init()
         self.settings = Settings()
 
-        self.screen = pygame.display.set_mode((0,0), pygame.FULLSCREEN)
+        self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
         self.settings.screen_width = self.screen.get_rect().width
         self.settings.screen_height = self.screen.get_rect().height
         pygame.display.set_caption("Alien Invasion")
         self.ship = Ship(self)
+        self.bullets = pygame.sprite.Group()
 
     def run_game(self):
         """Start the main loop for the game"""
         while True:
             self._check_events()
             self.ship.update()
+            self.bullets.update()
+            self._clear_old_bullets()
             self._update_screen()
 
             # Make the most recently drawn screen visible
             pygame.display.flip()
+
 
     def _check_events(self):
         """Respond to key presses and mouse events"""
@@ -49,6 +54,8 @@ class AlienInvasion:
         elif event.key == pygame.K_LEFT:
             # Move the ship to the left
             self.ship.moving_left = True
+        elif event.key == pygame.K_SPACE:
+            self._fire_bullet()
         elif event.key == pygame.K_q:
             # exit the game
             sys.exit()
@@ -64,6 +71,20 @@ class AlienInvasion:
         # Redraw the screen each pass through the loop
         self.screen.fill(self.settings.bg_color)
         self.ship.blitme()
+        for bullet in self.bullets.sprites():
+            bullet.draw_bullet()
+
+    def _fire_bullet(self):
+        """Create new bullet and add it to the bullet group"""
+        if len(self.bullets) < self.settings.bullets_allowed:
+            new_bullet = Bullet(self)
+            self.bullets.add(new_bullet)
+
+    def _clear_old_bullets(self):
+        """Delete the bullets that have left the screen"""
+        for bullet in self.bullets.copy():
+            if bullet.rect.bottom <= 0:
+                self.bullets.remove(bullet)
 
 
 if __name__ == '__main__':
