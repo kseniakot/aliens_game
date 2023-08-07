@@ -27,9 +27,7 @@ class Game():
         while True:
             self._check_events()
             self.ship.update()
-            self.bullets.update()
-            collisions = pygame.sprite.groupcollide(
-                self.bullets, self.aliens, True, True)
+            self._update_bullets()
             self._clear_old_bullets()
             self._update_aliens()
             self._update_screen()
@@ -79,14 +77,27 @@ class Game():
             if bullet.rect.bottom < self.screen_rect.top:
                 self.bullets.remove(bullet)
 
+    def _update_bullets(self):
+        self.bullets.update()
+        self._check_bullet_alien_collisions()
+
+    def _check_bullet_alien_collisions(self):
+        """Respond to bullet-alien collisions."""
+
+        collisions = pygame.sprite.groupcollide(
+            self.bullets, self.aliens, True, True)
+
+        if not len(self.aliens):
+            self._create_fleet()
+
     def _create_fleet(self):
 
         alien = Alien(self)
         alien_width = alien.rect.width
         alien_height = alien.rect.height
 
-        available_space_x = self.settings.screen_width - (2*alien_width)
-        number_aliens_x = available_space_x // (2*alien_width)
+        available_space_x = self.settings.screen_width - (2 * alien_width)
+        number_aliens_x = available_space_x // (2 * alien_width)
 
         available_space_y = self.settings.screen_height - (3 * alien_height) - self.ship.rect.height
         number_aliens_y = available_space_y // (2 * alien_height)
@@ -95,7 +106,7 @@ class Game():
             for number_col in range(number_aliens_y):
                 new_alien = Alien(self)
 
-                new_alien.x = alien_width + 2*alien_width * number_row
+                new_alien.x = alien_width + 2 * alien_width * number_row
                 new_alien.y = alien.rect.height + 2 * alien.rect.height * number_col
 
                 new_alien.rect.x = new_alien.x
@@ -116,11 +127,9 @@ class Game():
             alien.rect.y += self.settings.alien_y_speed
 
 
-
 def main():
     game = Game()
     game.run_game()
-
 
 
 if __name__ == '__main__':
